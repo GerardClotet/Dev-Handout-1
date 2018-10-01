@@ -10,12 +10,45 @@
 // Ignore Terrain Types and Tile Types for now, but we want the image!
 // ----------------------------------------------------
 
+enum class map_orientation {
+	orthogonal,
+	isometric,
+	error
 
+};
 // TODO 1: Create a struct needed to hold the information to Map node
 
+enum class map_render_order
+{
+	none,
+	right_down,
+	right_up,
+	left_up,
+	left_down
+};
 
+struct tileset_info {
+	uint firstgid = 0;
+	p2SString name = "";
+	p2SString image_path = "";
+	uint tile_width = 0;
+	uint tile_height = 0;
+	uint spacing = 0;
+	uint margin = 0;
+};
+struct map_info {
+	map_orientation orientation = map_orientation::error;
+	map_render_order render_order = map_render_order::none;
+	uint width = 0;
+	uint height = 0;
+	uint tile_width = 0;
+	uint tile_height = 0;
+	uint nextobjectid = 0;
 
+	p2SString filepath = "";
 
+	
+};
 // ----------------------------------------------------
 class j1Map : public j1Module
 {
@@ -39,59 +72,18 @@ public:
 	bool Load(const char* path);
 
 private:
-
-
-	bool LoadMap(pugi::xml_document& map_file);
-
+	bool LoadMapData();
+	bool LoadTileData();
 public:
 
-	enum map_orientantion {
-		right_down,
-		right_up,
-		left_down,
-		left_up,
-		error
-
-	};
-	struct MapNode;
-	struct TileSet;
-
-	pugi::xml_document Map;
-
 	// TODO 1: Add your struct for map info as public for now
-
-	struct MapNode {
-
-
-		uint width = 0;
-		uint height = 0;
-
-		uint tilewidth = 0;
-		uint tileheight = 0;
-		uint nextobjectid = 0;
-		float version;
-		uint nextobjectid = 0;
-		map_orientantion orientation = map_orientantion::error;
-	};
-
-	struct tileSet {
-
-		int firstgid = 0;
-		char* mapclass = "\0";
-		uint TileWidth = 0;
-		uint TileHeight = 0;
-		uint spacing = 0;
-		uint magine = 0;
-
-	};
+	map_info info;
+	p2List<tileset_info> tilesets;
+	p2List<SDL_Texture*> tilesets_textures;
 
 private:
 
 	pugi::xml_document	map_file;
-	p2SString	folder;
-	bool map_loaded;
-	
-
 	p2SString			folder;
 	bool				map_loaded;
 };
