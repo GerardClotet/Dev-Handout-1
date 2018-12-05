@@ -96,7 +96,7 @@ Text::~Text(){}
 Atlas::Atlas(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite) :UI(position, type), rect(rect), sprite(sprite){}
 bool Atlas::Update()
 {
-	App->render->Blit(this->sprite, this->position.x, this->position.y, &this->rect);
+	App->render->Blit(this->sprite, this->position.x, this->position.y, &this->rect,0.0f);
 	return true;
 }
 Atlas::~Atlas(){}
@@ -104,7 +104,7 @@ Atlas::~Atlas(){}
 Button::Button(iPoint position, UI_TYPE type, SDL_Rect rect) : UI(position, type), button_rect(rect) {}
 bool Button::Update()
 {
-	
+	//App->render
 	CheckMouse(this->button_rect, this->position);
 	return true;
 }

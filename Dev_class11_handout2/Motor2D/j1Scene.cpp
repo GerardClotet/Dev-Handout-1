@@ -90,16 +90,16 @@ bool j1Scene::Update(float dt)
 	switch (button->m_Event)
 	{
 	case  MOUSE_OUT:
-		banner = (Atlas*)App->gui->CreateBackground({ -App->render->camera.x,-App->render->camera.y }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas);
+		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas);
 		break;
 	case MOUSE_IN:
-		banner = (Atlas*)App->gui->CreateBackground({ -App->render->camera.x,-App->render->camera.y }, ATLAS, { 0,110,230,71 }, App->gui->atlas);
+		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 0,110,230,71 }, App->gui->atlas);
 		break;
 	case LEFT_CLICK:
-		banner = (Atlas*)App->gui->CreateBackground({ -App->render->camera.x,-App->render->camera.y }, ATLAS, { 411,166,230,71 }, App->gui->atlas);
+		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 411,166,230,71 }, App->gui->atlas);
 		break;
 	case RIGHT_CLICK:
-		banner = (Atlas*)App->gui->CreateBackground({ -App->render->camera.x,-App->render->camera.y }, ATLAS, { 411,166,230,71 }, App->gui->atlas);
+		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 411,166,230,71 }, App->gui->atlas);
 		break;
 	default:
 		break;
@@ -110,9 +110,7 @@ bool j1Scene::Update(float dt)
 	button->position.x = -App->render->camera.x * dt;
 	button->position.y = -App->render->camera.y * dt;
 
-	banner->Update();
-	text->Update();
-	button->Update();
+
 	// -------
 	if(App->input->GetKey(SDL_SCANCODE_L) == KEY_DOWN)
 		App->LoadGame("save_game.xml");
@@ -162,6 +160,9 @@ bool j1Scene::Update(float dt)
 		App->render->Blit(debug_tex, pos.x, pos.y);
 	}
 	
+	banner->Update();
+	text->Update();
+	button->Update();
 	return true;
 }
 
