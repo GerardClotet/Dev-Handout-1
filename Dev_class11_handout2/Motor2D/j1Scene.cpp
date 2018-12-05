@@ -107,8 +107,8 @@ bool j1Scene::Update(float dt)
 	// Gui ---
 	text->position.x = -App->render->camera.x + 500;
 	text->position.y = -App->render->camera.y + 15;
-	button->position.x = banner->position.x;
-	button->position.y = banner->position.y;
+	button->position.x = -App->render->camera.x * dt;
+	button->position.y = -App->render->camera.y * dt;
 
 	banner->Update();
 	text->Update();

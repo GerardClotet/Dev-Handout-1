@@ -104,7 +104,7 @@ Atlas::~Atlas(){}
 Button::Button(iPoint position, UI_TYPE type, SDL_Rect rect) : UI(position, type), button_rect(rect) {}
 bool Button::Update()
 {
-	App->render->Blit((SDL_Texture*)App->gui->GetAtlas(), this->position.x, this->position.y, &this->button_rect);
+	
 	CheckMouse(this->button_rect, this->position);
 	return true;
 }
