@@ -41,6 +41,7 @@ private:
 	Atlas* banner;
 	Text* text;
 	Button* button;
+	
 };
 
 #endif // __j1SCENE_H__

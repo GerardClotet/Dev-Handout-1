@@ -31,6 +31,7 @@ public:
 	UI(iPoint position, UI_TYPE type);
 	~UI();
 	virtual bool Update();
+	EVENT m_Event;
 	
 };
 
@@ -42,7 +43,7 @@ public:
 	~Button();
 	virtual bool Update();
 	EVENT CheckMouse(const SDL_Rect rect, const iPoint position);
-	EVENT m_Event;
+	
 };
 
 class Image : public UI
@@ -59,6 +60,7 @@ class Text : public UI
 {
 public:
 	_TTF_Font * txt_font = nullptr;
+	p2SString text;
 	char* string = nullptr;
 
 	virtual bool Update();
@@ -69,7 +71,7 @@ public:
 class Atlas : public UI
 {
 public:
-	SDL_Rect rect;
+	SDL_Rect changerect;
 	SDL_Texture* sprite;
 	virtual bool Update();
 
@@ -118,7 +120,7 @@ public:
 private:
 
 	
-
+	p2SString font_path;
 	p2SString atlas_file_name;
 
 	p2List<UI*> UI_elements;

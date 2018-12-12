@@ -21,7 +21,7 @@ bool j1Gui::Awake(pugi::xml_node& conf)
 {
 	LOG("Loading GUI atlas");
 	bool ret = true;
-
+	font_path = "fonts/open_sans/OpenSans-Semibold.ttf";
 	atlas_file_name = conf.child("atlas").attribute("file").as_string("atlas.png");
 	
 	return ret;
@@ -48,16 +48,24 @@ bool j1Gui::PostUpdate()
 }
 
 // Called before quitting
-bool j1Gui::CleanUp()
+bool j1Gui::CleanUp() // esta creant elements tot el rato per aixo hi ha memory leak
 {
 	LOG("Freeing GUI");
+	
 	for (uint i = 0; i < UI_elements.count(); ++i)
 	{
+		LOG("UI elements %i", UI_elements);
 		delete UI_elements[i];
 		UI_elements[i] = nullptr;
+		LOG("Element deleted");
+		
 	}
 	App->tex->UnLoad(atlas);
 	App->font->CleanUp();
+	
+	/*for (p2List_item<UI*>* item = UI_elements.start; item != nullptr; item = item->next) {
+		RELEASE(item->data);
+	} */
 	return true;
 }
 
@@ -78,25 +86,30 @@ UI::~UI(){}
 Image::Image(iPoint position, UI_TYPE type, SDL_Rect rect) : UI(position, type), rect(rect) {}
 bool Image::Update()
 {
-
+	LOG("image updated");
 	App->render->Blit((SDL_Texture*)(App->gui->GetAtlas()), this->position.x, this->position.y, &this->rect);
 	return true;
 }
 Image::~Image(){}
 
 
-Text::Text(iPoint position, UI_TYPE type, _TTF_Font* font, char* string) :UI(position, type), txt_font(font), string(string) {}
+Text::Text(iPoint position, UI_TYPE type, _TTF_Font* font, char* string) :UI(position, type), txt_font(font), string(string) 
+{
+}
 bool Text::Update()
 {
-	App->render->Blit(App->font->Print(this->string, { 255,255,255,255 }, this->txt_font),this->position.x, this->position.y);
+	
+	App->render->Blit(App->font->Print(this->string, { 255,255,255,255 }, this->txt_font), this->position.x, this->position.y, 0, 0.0f);
 	return true;
 }
 Text::~Text(){}
 
-Atlas::Atlas(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite) :UI(position, type), rect(rect), sprite(sprite){}
+Atlas::Atlas(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite) :UI(position, type), changerect(rect), sprite(sprite){}
 bool Atlas::Update()
 {
-	App->render->Blit(this->sprite, this->position.x, this->position.y, &this->rect,0.0f);
+	
+	
+	App->render->Blit(this->sprite, this->position.x, this->position.y, &this->changerect,0.0f);
 	return true;
 }
 Atlas::~Atlas(){}
@@ -104,7 +117,7 @@ Atlas::~Atlas(){}
 Button::Button(iPoint position, UI_TYPE type, SDL_Rect rect) : UI(position, type), button_rect(rect) {}
 bool Button::Update()
 {
-	//App->render
+	
 	CheckMouse(this->button_rect, this->position);
 	return true;
 }
@@ -122,7 +135,8 @@ UI*j1Gui::CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect)
 UI*j1Gui::CreateText(iPoint position, UI_TYPE type, _TTF_Font* txt_font, char* string)
 {
 	UI* text_element = nullptr;
-	text_element = new Text(position, type, (txt_font) ? txt_font:App->font->default, string);
+	txt_font = App->font->Load(font_path.GetString());
+	text_element = new Text(position, type, txt_font, string);
 	UI_elements.add(text_element);
 	LOG("text created");
 
@@ -134,7 +148,6 @@ UI*j1Gui::CreateText(iPoint position, UI_TYPE type, _TTF_Font* txt_font, char* s
 UI*j1Gui::CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite)
 {
 	UI* background_element = nullptr;
-	//background_element = new Atlas(position, type, rect, sprite);
 
 	background_element = new Atlas(position, type, rect, sprite);
 	UI_elements.add(background_element);
@@ -147,6 +160,7 @@ UI*j1Gui::CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect )
 {
 	UI* button_element = nullptr;
 	button_element = new Button(position, type, rect);
+	LOG("button created");
 	UI_elements.add(button_element);
 	return button_element;
 }

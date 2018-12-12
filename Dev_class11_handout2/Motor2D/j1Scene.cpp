@@ -46,11 +46,11 @@ bool j1Scene::Start()
 
 	// TODO 3: Create the banner (rect {485, 829, 328, 103}) and the text "Hello World"
 	
-	banner = (Atlas*)App->gui->CreateBackground({ 200,0 }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas);
-	text = (Text*)App->gui->CreateText({ 500 - App->render->camera.x,15 - App->render->camera.y }, TEXT, App->font->default, "Hello World!");
-	button = (Button*)App->gui->CreateButton({ 0,0 }, BUTTON, { 0,0,230,71 });
+	//banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas);
+	text = (Text*)App->gui->CreateText({ 500 ,15  }, TEXT, App->font->default, "Hello World!");
+	//button = (Button*)App->gui->CreateButton({ 0,0 }, BUTTON, { 0,0,230,71 });
 	
-	return true;
+ 	return true;
 }
 
 // Called each loop iteration
@@ -86,29 +86,29 @@ bool j1Scene::PreUpdate()
 // Called each loop iteration
 bool j1Scene::Update(float dt)
 {
-
-	switch (button->m_Event)
+	
+	/*switch (button->m_Event)
 	{
 	case  MOUSE_OUT:
-		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas);
+		banner->changerect = { 642, 166, 230, 71 };
+		
 		break;
 	case MOUSE_IN:
-		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 0,110,230,71 }, App->gui->atlas);
+		banner->changerect = { 0,110,230,71 };
 		break;
 	case LEFT_CLICK:
-		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 411,166,230,71 }, App->gui->atlas);
+		banner->changerect = { 411,166,230,71 };
 		break;
 	case RIGHT_CLICK:
-		banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 411,166,230,71 }, App->gui->atlas);
+		banner->changerect = { 411,166,230,71 };
 		break;
 	default:
 		break;
-	}
+	}*/
 	// Gui ---
-	text->position.x = -App->render->camera.x + 500;
-	text->position.y = -App->render->camera.y + 15;
-	button->position.x = -App->render->camera.x * dt;
-	button->position.y = -App->render->camera.y * dt;
+	
+	//button->position.x = -App->render->camera.x * dt;
+	//button->position.y = -App->render->camera.y * dt;
 
 
 	// -------
@@ -160,9 +160,9 @@ bool j1Scene::Update(float dt)
 		App->render->Blit(debug_tex, pos.x, pos.y);
 	}
 	
-	banner->Update();
+	//banner->Update();
 	text->Update();
-	button->Update();
+	//button->Update();
 	return true;
 }
 
@@ -180,6 +180,7 @@ bool j1Scene::PostUpdate()
 // Called before quitting
 bool j1Scene::CleanUp()
 {
+
 	LOG("Freeing scene");
 
 	return true;
