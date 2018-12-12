@@ -62,6 +62,7 @@ bool j1Gui::CleanUp() // esta creant elements tot el rato per aixo hi ha memory 
 	}
 	App->tex->UnLoad(atlas);
 	App->font->CleanUp();
+	 
 	
 	/*for (p2List_item<UI*>* item = UI_elements.start; item != nullptr; item = item->next) {
 		RELEASE(item->data);
@@ -93,14 +94,25 @@ bool Image::Update()
 Image::~Image(){}
 
 
-Text::Text(iPoint position, UI_TYPE type, _TTF_Font* font, char* string) :UI(position, type), txt_font(font), string(string) 
+Text::Text(iPoint position, UI_TYPE type, /* _TTF_Font* font*/ char* string) :UI(position, type),/* txt_font(font),*/ string(string) 
 {
 }
 bool Text::Update()
 {
 	
-	App->render->Blit(App->font->Print(this->string, { 255,255,255,255 }, this->txt_font), this->position.x, this->position.y, 0, 0.0f);
+		SDL_DestroyTexture(label_tex);
+		label_tex = App->font->Print(text.c_str());
+		SDL_QueryTexture(label_tex, NULL, NULL, &label_rect.w, &label_rect.h);
+		App->render->Blit(label_tex, this->position.x, this->position.y, &label_rect, 0.0f);
+	
+	//App->render->Blit(App->font->Print(this->string, { 255,255,255,255 }, this->txt_font), this->position.x, this->position.y, 0, 0.0f);
 	return true;
+}
+void Text::CleanUp()
+{
+	label_tex = nullptr;
+	delete &label_rect;
+	
 }
 Text::~Text(){}
 
@@ -132,11 +144,11 @@ UI*j1Gui::CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect)
 	return image_element;
 }
 
-UI*j1Gui::CreateText(iPoint position, UI_TYPE type, _TTF_Font* txt_font, char* string)
+UI*j1Gui::CreateText(iPoint position, UI_TYPE type,/* _TTF_Font* txt_font,*/ char* string)
 {
 	UI* text_element = nullptr;
-	txt_font = App->font->Load(font_path.GetString());
-	text_element = new Text(position, type, txt_font, string);
+	//txt_font = App->font->Load(font_path.GetString());
+	text_element = new Text(position, type,/* txt_font,*/ string);
 	UI_elements.add(text_element);
 	LOG("text created");
 

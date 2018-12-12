@@ -46,9 +46,10 @@ bool j1Scene::Start()
 
 	// TODO 3: Create the banner (rect {485, 829, 328, 103}) and the text "Hello World"
 	
-	//banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas);
-	text = (Text*)App->gui->CreateText({ 500 ,15  }, TEXT, App->font->default, "Hello World!");
-	//button = (Button*)App->gui->CreateButton({ 0,0 }, BUTTON, { 0,0,230,71 });
+	banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas);
+	text = (Text*)App->gui->CreateText({ 500 ,15  }, TEXT,  "Hello World!");
+	text->SetLabel("Hello Please work");
+	button = (Button*)App->gui->CreateButton({ 0,0 }, BUTTON, { 0,0,230,71 });
 	
  	return true;
 }
@@ -87,7 +88,7 @@ bool j1Scene::PreUpdate()
 bool j1Scene::Update(float dt)
 {
 	
-	/*switch (button->m_Event)
+	switch (button->m_Event)
 	{
 	case  MOUSE_OUT:
 		banner->changerect = { 642, 166, 230, 71 };
@@ -104,12 +105,14 @@ bool j1Scene::Update(float dt)
 		break;
 	default:
 		break;
-	}*/
+	}
 	// Gui ---
 	
 	//button->position.x = -App->render->camera.x * dt;
 	//button->position.y = -App->render->camera.y * dt;
 
+	LOG("button X: %i", button->position.x);
+	LOG("button Y: %i", button->position.y);
 
 	// -------
 	if(App->input->GetKey(SDL_SCANCODE_L) == KEY_DOWN)
@@ -160,9 +163,9 @@ bool j1Scene::Update(float dt)
 		App->render->Blit(debug_tex, pos.x, pos.y);
 	}
 	
-	//banner->Update();
+	banner->Update();
 	text->Update();
-	//button->Update();
+	button->Update();
 	return true;
 }
 

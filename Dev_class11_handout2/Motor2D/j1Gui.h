@@ -60,12 +60,19 @@ class Text : public UI
 {
 public:
 	_TTF_Font * txt_font = nullptr;
-	p2SString text;
+	std::string text="";
 	char* string = nullptr;
-
+	SDL_Texture* label_tex;
+	SDL_Rect label_rect= { 0,0,0,0 };
 	virtual bool Update();
-	Text(iPoint position, UI_TYPE type, _TTF_Font * txt_font, char* string);
+	void SetLabel(char* txt)
+	{
+		text = txt;
+	}
+	Text(iPoint position, UI_TYPE type /*_TTF_Font * txt_font*/, char* string);
 	~Text();
+
+	void CleanUp();
 };
 
 class Atlas : public UI
@@ -110,7 +117,7 @@ public:
 	const SDL_Texture* GetAtlas() const;
 
 	UI* CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect);
-	UI* CreateText(iPoint position, UI_TYPE type, _TTF_Font* txt_font, char* string);
+	UI* CreateText(iPoint position, UI_TYPE type, /*_TTF_Font* txt_font,*/ char* string);
 	UI* CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture *sprite);
 	UI* CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect);
 
