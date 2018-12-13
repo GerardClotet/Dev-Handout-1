@@ -6,8 +6,8 @@
 struct SDL_Texture;
 
 class Image;
-class Text;
-class Atlas;
+class Label;
+class Image;
 class Button;
 class j1Scene : public j1Module
 {
@@ -38,8 +38,8 @@ public:
 
 private:
 	SDL_Texture* debug_tex;
-	Atlas* banner;
-	Text* text;
+	Image* banner;
+	Label* text;
 	Button* button;
 	
 };

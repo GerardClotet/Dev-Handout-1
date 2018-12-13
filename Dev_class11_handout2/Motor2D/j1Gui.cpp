@@ -77,78 +77,93 @@ const SDL_Texture* j1Gui::GetAtlas() const
 }
 
 // class Gui ---------------------------------------------------
-UI::UI(iPoint position, UI_TYPE type) :position(position), type(type){}
+UI::UI(iPoint position, UI_TYPE type, UI* parent) :screen_pos(position), UI_type(type),parent(parent)
+{
+	UI_type = type;
+	local_pos = position;
+
+	if (parent != nullptr)
+	{
+		this->parent = parent;
+		parent->children.PushBack(this);
+		screen_pos = { parent->screen_pos.x + local_pos.x, parent->screen_pos.y + local_pos.y };
+	}
+
+	else screen_pos = position;
+}
 bool UI::Update()
 {
+	
 	return true;
 }
 UI::~UI(){}
 
-Image::Image(iPoint position, UI_TYPE type, SDL_Rect rect) : UI(position, type), rect(rect) {}
-bool Image::Update()
-{
-	LOG("image updated");
-	App->render->Blit((SDL_Texture*)(App->gui->GetAtlas()), this->position.x, this->position.y, &this->rect);
-	return true;
-}
-Image::~Image(){}
+//Image::Image(iPoint position, UI_TYPE type, SDL_Rect rect,UI* parent) : UI(position, type,parent), rect(rect) {}
+//bool Image::Update()
+//{
+//	LOG("image updated");
+//	App->render->Blit((SDL_Texture*)(App->gui->GetAtlas()), this->screen_pos.x, this->screen_pos.y, &this->rect);
+//	return true;
+//}
+//Image::~Image(){}
 
 
-Text::Text(iPoint position, UI_TYPE type, /* _TTF_Font* font*/ char* string) :UI(position, type),/* txt_font(font),*/ string(string) 
+Label::Label(iPoint position, UI_TYPE type, /* _TTF_Font* font*/ char* string,UI* parent) :UI(position, type,parent),/* txt_font(font),*/ string(string) 
 {
 }
-bool Text::Update()
+bool Label::Update()
 {
 	
 		SDL_DestroyTexture(label_tex);
 		label_tex = App->font->Print(text.c_str());
 		SDL_QueryTexture(label_tex, NULL, NULL, &label_rect.w, &label_rect.h);
-		App->render->Blit(label_tex, this->position.x, this->position.y, &label_rect, 0.0f);
+		App->render->Blit(label_tex, this->screen_pos.x, this->screen_pos.y, &label_rect, 0.0f);
 	
 	//App->render->Blit(App->font->Print(this->string, { 255,255,255,255 }, this->txt_font), this->position.x, this->position.y, 0, 0.0f);
 	return true;
 }
-void Text::CleanUp()
+void Label::CleanUp()
 {
 	label_tex = nullptr;
 	delete &label_rect;
 	
 }
-Text::~Text(){}
+Label::~Label(){}
 
-Atlas::Atlas(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite) :UI(position, type), changerect(rect), sprite(sprite){}
-bool Atlas::Update()
+Image::Image(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite,UI* parent) :UI(position, type,parent), changerect(rect), sprite(sprite){}
+bool Image::Update()
 {
 	
 	
-	App->render->Blit(this->sprite, this->position.x, this->position.y, &this->changerect,0.0f);
+	App->render->Blit(this->sprite, this->screen_pos.x, this->screen_pos.y, &this->changerect,0.0f);
 	return true;
 }
-Atlas::~Atlas(){}
+Image::~Image(){}
 
-Button::Button(iPoint position, UI_TYPE type, SDL_Rect rect) : UI(position, type), button_rect(rect) {}
+Button::Button(iPoint position, UI_TYPE type, SDL_Rect rect,SDL_Texture* sprite, UI* parent) : UI(position, type,parent), button_rect(rect), sprite(sprite) {}
 bool Button::Update()
 {
-	
-	CheckMouse(this->button_rect, this->position);
+	App->render->Blit(this->sprite,this->screen_pos.x, this->screen_pos.y, &this->button_rect,0.0f);
+	CheckMouse(this->button_rect, this->screen_pos);
 	return true;
 }
 Button::~Button() {}
 
-UI*j1Gui::CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect)
+//UI*j1Gui::CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect, UI* parent)
+//
+//{
+//	UI* image_element = nullptr;
+//	image_element = new Image(position, type, rect, parent);
+//	UI_elements.add(image_element);
+//	return image_element;
+//}
 
-{
-	UI* image_element = nullptr;
-	image_element = new Image(position, type, rect);
-	UI_elements.add(image_element);
-	return image_element;
-}
-
-UI*j1Gui::CreateText(iPoint position, UI_TYPE type,/* _TTF_Font* txt_font,*/ char* string)
+UI*j1Gui::CreateLabel(iPoint position, UI_TYPE type,/* _TTF_Font* txt_font,*/ char* string, UI* parent)
 {
 	UI* text_element = nullptr;
 	//txt_font = App->font->Load(font_path.GetString());
-	text_element = new Text(position, type,/* txt_font,*/ string);
+
+	text_element = new Label(position, type,/* txt_font,*/ string,parent);
 	UI_elements.add(text_element);
 	LOG("text created");
 
@@ -157,21 +172,21 @@ UI*j1Gui::CreateText(iPoint position, UI_TYPE type,/* _TTF_Font* txt_font,*/ cha
 }
 
 
-UI*j1Gui::CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite)
+UI*j1Gui::CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite, UI* parent)
 {
 	UI* background_element = nullptr;
 
-	background_element = new Atlas(position, type, rect, sprite);
+	background_element = new Image(position, type, rect, sprite, parent);
 	UI_elements.add(background_element);
 	//LOG("background created");
 
 	return background_element;
 }
 
-UI*j1Gui::CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect )
+UI*j1Gui::CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite, UI* parent )
 {
 	UI* button_element = nullptr;
-	button_element = new Button(position, type, rect);
+	button_element = new Button(position, type, rect,sprite,parent);
 	LOG("button created");
 	UI_elements.add(button_element);
 	return button_element;
@@ -205,4 +220,42 @@ EVENT Button::CheckMouse(const SDL_Rect rect_button, const iPoint position)
 	}
 	
 	return m_Event;
+}
+
+void UI::SetScreenPos(iPoint position)
+{
+	screen_pos = position;
+}
+iPoint UI::GetScreenPos()
+{
+	return screen_pos;
+}
+
+void UI::SetLocalPos(iPoint position)
+{
+	local_pos = position;
+}
+iPoint UI::GetLocalPos()
+{
+	return local_pos;
+}
+
+SDL_Rect UI::GetScreenRect()
+{
+	return global_rect;
+}
+
+SDL_Rect UI::GetLocalRect()
+ {
+	return local_rect;
+}
+
+bool UI::PriorityBox(int x, int y)
+{
+	if (x > global_rect.x && x < global_rect.x + global_rect.w && y > global_rect.y && y < global_rect.y + global_rect.h)
+	{
+		parentboxCond = true;
+	}
+	else parentboxCond = false;
+	return parentboxCond;
 }

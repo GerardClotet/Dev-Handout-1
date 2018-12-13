@@ -3,6 +3,7 @@
 
 #include "j1Module.h"
 #include "j1Fonts.h"
+#include "p2DynArray.h"
 #define CURSOR_WIDTH 2
 
 // TODO 1: Create your structure of classes
@@ -26,37 +27,53 @@ enum UI_TYPE
 class UI
 {
 public: 
-	iPoint position;
-	UI_TYPE type;
-	UI(iPoint position, UI_TYPE type);
+	iPoint screen_pos;
+	iPoint local_pos;
+	UI_TYPE UI_type;
+	EVENT m_Event;
+	SDL_Rect global_rect;
+	SDL_Rect local_rect;
+	bool parentboxCond;
+	UI(iPoint position, UI_TYPE type, UI* parent);
 	~UI();
 	virtual bool Update();
-	EVENT m_Event;
 	
+	void SetScreenPos(iPoint position);
+	iPoint GetScreenPos();
+	void SetLocalPos(iPoint position);
+	iPoint GetLocalPos();
+	SDL_Rect GetScreenRect();
+	SDL_Rect GetLocalRect();
+
+	bool PriorityBox(int x, int y); //children rect is inside parent rect
+protected:
+		UI* parent = nullptr;
+	p2DynArray<UI*> children;
 };
 
 class Button : public UI
 {
 public:
 	SDL_Rect button_rect;
-	Button(iPoint position, UI_TYPE type, SDL_Rect button_rect);
+	SDL_Texture* sprite;
+	Button(iPoint position, UI_TYPE type, SDL_Rect button_rect,SDL_Texture* sprite, UI* parent);
 	~Button();
 	virtual bool Update();
 	EVENT CheckMouse(const SDL_Rect rect, const iPoint position);
 	
 };
 
-class Image : public UI
-{
-public:
-	SDL_Rect rect;
-	Image(iPoint position, UI_TYPE type, SDL_Rect rect);
-	~Image();
-	virtual bool Update();
+//class Image : public UI
+//{
+//public:
+//	SDL_Rect rect;
+//	Image(iPoint position, UI_TYPE type, SDL_Rect rect,UI* parent);
+//	~Image();
+//	virtual bool Update();
+//
+//};
 
-};
-
-class Text : public UI
+class Label : public UI
 {
 public:
 	_TTF_Font * txt_font = nullptr;
@@ -69,21 +86,21 @@ public:
 	{
 		text = txt;
 	}
-	Text(iPoint position, UI_TYPE type /*_TTF_Font * txt_font*/, char* string);
-	~Text();
+	Label(iPoint position, UI_TYPE type /*_TTF_Font * txt_font*/, char* string,UI* parent);
+	~Label();
 
 	void CleanUp();
 };
 
-class Atlas : public UI
+class Image : public UI
 {
 public:
 	SDL_Rect changerect;
 	SDL_Texture* sprite;
 	virtual bool Update();
 
-	Atlas(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite);
-	~Atlas();
+	Image(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite,UI*parent);
+	~Image();
 
 };
 // ---------------------------------------------------
@@ -116,10 +133,10 @@ public:
 
 	const SDL_Texture* GetAtlas() const;
 
-	UI* CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect);
-	UI* CreateText(iPoint position, UI_TYPE type, /*_TTF_Font* txt_font,*/ char* string);
-	UI* CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture *sprite);
-	UI* CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect);
+	//UI* CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect, UI* parent);
+	UI* CreateLabel(iPoint position, UI_TYPE type, /*_TTF_Font* txt_font,*/ char* string, UI* parent);
+	UI* CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture *sprite, UI* parent);
+	UI* CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect,SDL_Texture* sprite,UI* parent);
 
 	SDL_Texture* atlas = nullptr;
 	
