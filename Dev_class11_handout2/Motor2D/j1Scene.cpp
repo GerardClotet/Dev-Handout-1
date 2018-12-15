@@ -49,8 +49,8 @@ bool j1Scene::Start()
 	//banner = (Atlas*)App->gui->CreateBackground({ 0,0 }, ATLAS, { 642, 166, 230, 71 }, App->gui->atlas, nullptr);
 	text = (Label*)App->gui->CreateLabel({ 500 ,15  }, TEXT,  "", nullptr);
 	text->SetLabel("Hello Please work");
-	button = (Button*)App->gui->CreateButton({ 0,0 }, BUTTON, { 0,0,230,71 },App->gui->atlas,nullptr);
-	
+	button = (Button*)App->gui->CreateButton({ 0,0 }, BUTTON, {0,0,230,71 },App->gui->atlas,nullptr);
+	button->interactable = true;
  	return true;
 }
 
@@ -91,17 +91,17 @@ bool j1Scene::Update(float dt)
 	switch (button->m_Event)
 	{
 	case  MOUSE_OUT:
-		button->button_rect = { 642, 166, 230, 71 };
+		button->sprite_rect = { 642, 166, 230, 71 };
 		
 		break;
 	case MOUSE_IN:
-		button->button_rect = { 0,110,230,71 };
+		button->sprite_rect = { 0,110,230,71 };
 		break;
 	case LEFT_CLICK:
-		button->button_rect = { 411,166,230,71 };
+		button->sprite_rect = { 411,166,230,71 };
 		break;
 	case RIGHT_CLICK:
-		button->button_rect = { 411,166,230,71 };
+		button->sprite_rect = { 411,166,230,71 };
 		break;
 	default:
 		break;
@@ -165,6 +165,8 @@ bool j1Scene::Update(float dt)
 	
 	text->Update();
 	button->Update();
+	ui->Update();
+
 	return true;
 }
 

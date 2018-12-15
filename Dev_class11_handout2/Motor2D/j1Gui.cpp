@@ -70,6 +70,36 @@ bool j1Gui::CleanUp() // esta creant elements tot el rato per aixo hi ha memory 
 	return true;
 }
 
+void j1Gui::ElementPriority(int x, int y)
+{
+	
+	//for (p2List_item<UI*>* ui_item = UI_elements.start; ui_item != NULL; ui_item = ui_item->next)
+	//{
+	//	UI* current_elem = ui_item->data;
+	//	int children_num = current_elem->children.Count();
+	//	if (current_elem->PriorityBox(x, y))
+	//	{
+	//		if (children_num > 0)
+	//		{
+	//			for (int i = 0; i < children_num; i++)
+	//			{
+	//				if (current_elem->children[i]->PriorityBox(x,y))
+	//				{
+	//					if (current_elem->children[i]->interactable) //potser ha de ser una funció
+	//					{
+	//						current_interac_elem = current_elem->children[i];
+	//					}
+
+	//					//if (App->in)
+	//					//{
+
+	//					//}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+}
 // const getter for atlas
 const SDL_Texture* j1Gui::GetAtlas() const
 {
@@ -91,9 +121,37 @@ UI::UI(iPoint position, UI_TYPE type, UI* parent) :screen_pos(position), UI_type
 
 	else screen_pos = position;
 }
-bool UI::Update()
+
+UI::UI(iPoint position, UI_TYPE type, SDL_Rect rect, UI* parent) : screen_pos(position), UI_type(type), sprite_rect(rect)
+{}
+bool UI::Update()//aqui
 {
-	
+	int x, y;
+	App->input->GetMousePosition(x, y);
+	if (dragUIelem)
+	{
+		if (parent != nullptr)
+		{
+			local_pos = { x - parent->screen_pos.x, y - parent->screen_pos.y };
+		
+		}
+		else local_pos = { x,y };
+	}
+
+	if (parent != nullptr)
+	{
+		screen_pos = { parent->GetScreenPos().x + local_pos.x, parent->GetScreenPos().y + local_pos.y };
+	}
+	else
+	{
+		screen_pos = local_pos;
+	}
+
+	local_rect.x = local_pos.x;
+	local_rect.y = local_pos.y;
+
+	screen_rect.x = screen_pos.x;
+	screen_rect.y = screen_pos.y;
 	return true;
 }
 UI::~UI(){}
@@ -110,14 +168,15 @@ UI::~UI(){}
 
 Label::Label(iPoint position, UI_TYPE type, /* _TTF_Font* font*/ char* string,UI* parent) :UI(position, type,parent),/* txt_font(font),*/ string(string) 
 {
+
 }
 bool Label::Update()
 {
 	
 		SDL_DestroyTexture(label_tex);
 		label_tex = App->font->Print(text.c_str());
-		SDL_QueryTexture(label_tex, NULL, NULL, &label_rect.w, &label_rect.h);
-		App->render->Blit(label_tex, this->screen_pos.x, this->screen_pos.y, &label_rect, 0.0f);
+		SDL_QueryTexture(label_tex, NULL, NULL, &sprite_rect.w, &sprite_rect.h);
+		App->render->Blit(label_tex, this->screen_pos.x, this->screen_pos.y, &sprite_rect, 0.0f);
 	
 	//App->render->Blit(App->font->Print(this->string, { 255,255,255,255 }, this->txt_font), this->position.x, this->position.y, 0, 0.0f);
 	return true;
@@ -125,38 +184,41 @@ bool Label::Update()
 void Label::CleanUp()
 {
 	label_tex = nullptr;
-	delete &label_rect;
+	delete &sprite_rect;
 	
 }
 Label::~Label(){}
 
-Image::Image(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite,UI* parent) :UI(position, type,parent), changerect(rect), sprite(sprite){}
+Image::Image(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite,UI* parent) :UI(position, type,rect,parent),  sprite(sprite)
+{
+	local_rect = { position.x, position.y,rect.w,rect.h };
+	screen_rect = { screen_pos.x, screen_pos.x,screen_rect.w,screen_rect.h };
+	this->sprite_rect = rect;
+}
 bool Image::Update()
 {
 	
 	
-	App->render->Blit(this->sprite, this->screen_pos.x, this->screen_pos.y, &this->changerect,0.0f);
+	App->render->Blit(this->sprite, this->screen_pos.x, this->screen_pos.y, &this->sprite_rect,0.0f);
 	return true;
 }
 Image::~Image(){}
 
-Button::Button(iPoint position, UI_TYPE type, SDL_Rect rect,SDL_Texture* sprite, UI* parent) : UI(position, type,parent), button_rect(rect), sprite(sprite) {}
+Button::Button(iPoint position, UI_TYPE type, SDL_Rect rect,SDL_Texture* sprite, UI* parent) : UI(position, type,rect,parent),  sprite(sprite) 
+{
+	local_rect = { position.x,position.y, rect.w,rect.h };
+	local_pos = { position.x,position.y };
+	this->sprite_rect = rect;
+}
 bool Button::Update()
 {
-	App->render->Blit(this->sprite,this->screen_pos.x, this->screen_pos.y, &this->button_rect,0.0f);
-	CheckMouse(this->button_rect, this->screen_pos);
+	
+	App->render->Blit(this->sprite,this->local_pos.x, this->local_pos.y, &this->sprite_rect,0.0f);
+	CheckMouse(this->sprite_rect, this->screen_pos);
 	return true;
 }
 Button::~Button() {}
 
-//UI*j1Gui::CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect, UI* parent)
-//
-//{
-//	UI* image_element = nullptr;
-//	image_element = new Image(position, type, rect, parent);
-//	UI_elements.add(image_element);
-//	return image_element;
-//}
 
 UI*j1Gui::CreateLabel(iPoint position, UI_TYPE type,/* _TTF_Font* txt_font,*/ char* string, UI* parent)
 {
@@ -172,15 +234,15 @@ UI*j1Gui::CreateLabel(iPoint position, UI_TYPE type,/* _TTF_Font* txt_font,*/ ch
 }
 
 
-UI*j1Gui::CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite, UI* parent)
+UI*j1Gui::CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite, UI* parent)
 {
-	UI* background_element = nullptr;
+	UI* image_element = nullptr;
 
-	background_element = new Image(position, type, rect, sprite, parent);
-	UI_elements.add(background_element);
-	//LOG("background created");
+	image_element = new Image(position, type, rect, sprite, parent);
+	UI_elements.add(image_element);
+	
 
-	return background_element;
+	return image_element;
 }
 
 UI*j1Gui::CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture* sprite, UI* parent )
@@ -192,27 +254,62 @@ UI*j1Gui::CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture
 	return button_element;
 }
 
-EVENT Button::CheckMouse(const SDL_Rect rect_button, const iPoint position)
+EVENT UI::CheckMouse(const SDL_Rect rect_button, const iPoint position)
 {
 	m_Event = NO_EVENT;
-	int mouse_X, mouse_Y;
-	App->input->GetMousePosition(mouse_X, mouse_Y);
+	LOG("rect.x: %i", rect_button.x);
+	LOG("rect.y: %i", rect_button.y);
+	LOG("rect.w: %i", rect_button.w);
+	LOG("rect.h: %i", rect_button.h);
 
-	if ((mouse_X < position.x + rect_button.w && mouse_X > position.x) && mouse_Y < position.y + rect_button.h && mouse_Y > position.y)
+	
+	App->input->GetMousePosition(mouse_pos.x, mouse_pos.y);
+	uint right_click, left_click;
+	right_click = App->input->GetMouseButtonDown(SDL_BUTTON_RIGHT);
+	left_click = App->input->GetMouseButtonDown(SDL_BUTTON_LEFT);
+
+	if ((mouse_pos.x < position.x + rect_button.w && mouse_pos.x > position.x) && mouse_pos.y < position.y + rect_button.h && mouse_pos.y > position.y)
 	{
 		m_Event = MOUSE_IN;
 
-		LOG("mouse in");
-		if (App->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KEY_REPEAT)
+		LOG("mouse in %i", right_click);
+		if (right_click == KEY_REPEAT)
 		{
-			LOG("right click");
 			m_Event = RIGHT_CLICK;
+			LOG("right click");
+			clicked = true;
+			
+			
 		}
-		else if (App->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KEY_REPEAT)
+		else if (left_click == KEY_REPEAT)
 		{
 			LOG("left click");
 			m_Event = LEFT_CLICK;
+			clicked = true;
 		}
+
+		if (!RIGHT_CLICK && !LEFT_CLICK)
+		{
+			LOG("released");
+			//m_Event = RELEASE_CLICK;
+			clicked = false;
+		}
+		
+		/*else if ((right_click || left_click) == KEY_UP)
+		{
+
+			m_Event = RELEASE_CLICK;
+		}*/
+		if (interactable == true && m_Event == (LEFT_CLICK || RIGHT_CLICK) && clicked == true)
+		{
+			dragUIelem = true;
+			DragUI();
+		}
+		
+	}
+	else if (!RIGHT_CLICK && !LEFT_CLICK)
+	{
+		dragUIelem = false;
 	}
 	else
 	{
@@ -220,6 +317,27 @@ EVENT Button::CheckMouse(const SDL_Rect rect_button, const iPoint position)
 	}
 	
 	return m_Event;
+}
+
+bool UI::DragUI()
+{
+	if (dragUIelem)
+	{
+		if (local_pos != mouse_pos)
+		{
+			iPoint spaceVec = { mouse_pos.x - local_pos.x, mouse_pos.y - local_pos.y };
+			int normal = sqrt(abs(spaceVec.x) + abs(spaceVec.y));
+			iPoint approach = { spaceVec.x / normal, spaceVec.y / normal };
+			local_pos += approach;
+		}
+
+		else if (local_pos == mouse_pos)
+		{
+			dragUIelem = false;
+		}
+	}
+
+	return true;
 }
 
 void UI::SetScreenPos(iPoint position)
@@ -242,7 +360,7 @@ iPoint UI::GetLocalPos()
 
 SDL_Rect UI::GetScreenRect()
 {
-	return global_rect;
+	return screen_rect;
 }
 
 SDL_Rect UI::GetLocalRect()
@@ -252,10 +370,7 @@ SDL_Rect UI::GetLocalRect()
 
 bool UI::PriorityBox(int x, int y)
 {
-	if (x > global_rect.x && x < global_rect.x + global_rect.w && y > global_rect.y && y < global_rect.y + global_rect.h)
-	{
-		parentboxCond = true;
-	}
-	else parentboxCond = false;
-	return parentboxCond;
+	
+	
+	return (x > screen_rect.x && x < screen_rect.x + screen_rect.w && y > screen_rect.y && y < screen_rect.y + screen_rect.h);
 }

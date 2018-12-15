@@ -13,7 +13,8 @@ enum EVENT
 	MOUSE_IN,
 	MOUSE_OUT,
 	RIGHT_CLICK,
-	LEFT_CLICK
+	LEFT_CLICK,
+	RELEASE_CLICK
 };
 enum UI_TYPE
 {
@@ -29,24 +30,38 @@ class UI
 public: 
 	iPoint screen_pos;
 	iPoint local_pos;
+
+	iPoint mouse_pos;
 	UI_TYPE UI_type;
 	EVENT m_Event;
-	SDL_Rect global_rect;
+	SDL_Rect screen_rect;
 	SDL_Rect local_rect;
+	SDL_Rect sprite_rect;
 	bool parentboxCond;
+	bool dragUIelem = false;
+	bool interactable = false;
+
+	bool clicked = false;
 	UI(iPoint position, UI_TYPE type, UI* parent);
+	UI(iPoint position, UI_TYPE type, SDL_Rect rect, UI* parent);
+	//UI(iPoint position, UI_TYPE type, SDL_Rect rect, UI* parent);
 	~UI();
 	virtual bool Update();
 	
 	void SetScreenPos(iPoint position);
 	iPoint GetScreenPos();
+
 	void SetLocalPos(iPoint position);
 	iPoint GetLocalPos();
+
 	SDL_Rect GetScreenRect();
 	SDL_Rect GetLocalRect();
 
+	bool DragUI();
+
+	EVENT CheckMouse(const SDL_Rect rect, const iPoint position);
 	bool PriorityBox(int x, int y); //children rect is inside parent rect
-protected:
+public:
 		UI* parent = nullptr;
 	p2DynArray<UI*> children;
 };
@@ -54,12 +69,12 @@ protected:
 class Button : public UI
 {
 public:
-	SDL_Rect button_rect;
+	//SDL_Rect sprite_rect;
 	SDL_Texture* sprite;
 	Button(iPoint position, UI_TYPE type, SDL_Rect button_rect,SDL_Texture* sprite, UI* parent);
 	~Button();
 	virtual bool Update();
-	EVENT CheckMouse(const SDL_Rect rect, const iPoint position);
+	
 	
 };
 
@@ -80,7 +95,7 @@ public:
 	std::string text="";
 	char* string = nullptr;
 	SDL_Texture* label_tex;
-	SDL_Rect label_rect= { 0,0,0,0 };
+	//SDL_Rect sprite_rect= { 0,0,0,0 };
 	virtual bool Update();
 	void SetLabel(char* txt)
 	{
@@ -95,7 +110,7 @@ public:
 class Image : public UI
 {
 public:
-	SDL_Rect changerect;
+	//SDL_Rect changerect;
 	SDL_Texture* sprite;
 	virtual bool Update();
 
@@ -135,12 +150,13 @@ public:
 
 	//UI* CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect, UI* parent);
 	UI* CreateLabel(iPoint position, UI_TYPE type, /*_TTF_Font* txt_font,*/ char* string, UI* parent);
-	UI* CreateBackground(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture *sprite, UI* parent);
+	UI* CreateImage(iPoint position, UI_TYPE type, SDL_Rect rect, SDL_Texture *sprite, UI* parent);
 	UI* CreateButton(iPoint position, UI_TYPE type, SDL_Rect rect,SDL_Texture* sprite,UI* parent);
 
 	SDL_Texture* atlas = nullptr;
 	
-	
+	void ElementPriority(int x, int y);
+	UI*current_interac_elem = nullptr;
 private:
 
 	

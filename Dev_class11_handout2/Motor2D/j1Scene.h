@@ -9,6 +9,7 @@ class Image;
 class Label;
 class Image;
 class Button;
+class UI;
 class j1Scene : public j1Module
 {
 public:
@@ -41,7 +42,7 @@ private:
 	Image* banner;
 	Label* text;
 	Button* button;
-	
+	UI* ui;
 };
 
 #endif // __j1SCENE_H__
